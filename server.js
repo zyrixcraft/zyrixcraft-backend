@@ -2,12 +2,21 @@ const express = require('express');
 const cors = require('cors');
 const faq = require("./faq.json");
 const stringSimilarity = require('string-similarity');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
+
+mongoose.connect('mongodb+srv://zyrixcraft:Zyrixcraft%40%4077@forms.xqf8gij.mongodb.net/?retryWrites=true&w=majority&appName=Forms', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
 
 const findAnswer = (query) => {
   const questions = faq.map(item => item.question);
@@ -39,6 +48,30 @@ app.post('/ask', (req, res) => {
   }
 
   return res.json({ answer });
+});
+
+const ContactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  phone: String,
+  message: String
+});
+
+const Contact = mongoose.model('Contact', ContactSchema);
+
+app.post('/form', async (req, res) => {
+  const { form } = req.body;
+  console.log('Received data:', form);
+  const { name, email, phone, message } = req.body;
+
+  try {
+    const newContact = new Contact({ name, email, phone, message });
+    await newContact.save();
+    res.status(201).json({ success: true, message: 'Message saved successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+
 });
 
 app.listen(port, () => {
