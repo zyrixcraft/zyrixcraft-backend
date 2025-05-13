@@ -74,6 +74,28 @@ app.post('/form', async (req, res) => {
 
 });
 
+app.get('/form', async (req, res) => {
+  try {
+    const contacts = await Contact.find();
+    res.status(200).json(contacts);
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching data' });
+  }
+});
+
+app.delete('/form/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const deletedContact = await Contact.findByIdAndDelete(id);
+    if (!deletedContact) {
+      return res.status(404).json({ success: false, message: 'Contact not found' });
+    }
+    res.status(200).json({ success: true, message: 'Contact deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error deleting contact' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
