@@ -60,7 +60,7 @@ const ContactSchema = new mongoose.Schema({
 const Contact = mongoose.model('Contact', ContactSchema);
 
 app.post('/form', async (req, res) => {
-  const { form } = req.body;
+  const form = req.body;
   console.log('Received data:', form);
   const { name, email, phone, message } = req.body;
 
@@ -93,6 +93,23 @@ app.delete('/form/:id', async (req, res) => {
     res.status(200).json({ success: true, message: 'Contact deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error deleting contact' });
+  }
+});
+
+const GenericSchema = new mongoose.Schema({}, { strict: false });
+const GenericData = mongoose.model('GenericData', GenericSchema);
+
+app.post('/storeData', async (req, res) => {
+  const data = req.body;
+  console.log('Received generic data:', data);
+
+  try {
+    const newData = new GenericData(data);
+    await newData.save();
+    res.status(201).json({ success: true, message: 'Data stored successfully' });
+  } catch (error) {
+    console.error('Error saving generic data:', error);
+    res.status(500).json({ success: false, message: 'Failed to store data' });
   }
 });
 
